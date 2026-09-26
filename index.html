@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ガソリン代ルート比較</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <h1>ガソリン代ルート比較</h1>
+  </header>
+
+  <main>
+    <!-- 1. 入力欄 -->
+    <section class="card">
+      <form id="input-form" novalidate>
+        <label>出発地
+          <input type="text" id="origin" placeholder="例：東京駅">
+        </label>
+        <label>目的地
+          <input type="text" id="destination" placeholder="例：横浜駅">
+        </label>
+        <div class="row">
+          <label>燃費（km/L）
+            <input type="number" id="efficiency" step="0.1" min="0" inputmode="decimal" placeholder="例：15">
+          </label>
+          <label>単価（円/L）
+            <input type="number" id="price" step="1" min="0" inputmode="decimal" placeholder="例：170">
+          </label>
+        </div>
+        <button type="submit" id="calc-button">計算</button>
+      </form>
+      <p id="message" class="message" hidden></p>
+    </section>
+
+    <!-- 2. 地名候補の一覧 -->
+    <section id="candidates" class="card" hidden>
+      <h2>地名の候補を選んでください</h2>
+      <div id="origin-candidates"></div>
+      <div id="destination-candidates"></div>
+    </section>
+
+    <!-- 3. 地図 -->
+    <section class="card">
+      <div id="map"></div>
+    </section>
+
+    <!-- 4. 比較表 -->
+    <section id="result" class="card" hidden>
+      <h2>ルート比較</h2>
+      <p id="suggestion" class="suggestion"></p>
+      <table>
+        <thead>
+          <tr><th>ルート</th><th>距離</th><th>所要時間</th><th>ガソリン代</th></tr>
+        </thead>
+        <tbody id="result-body"></tbody>
+      </table>
+    </section>
+  </main>
+
+  <footer>
+    地図 © OpenStreetMap contributors ／ 地名検索 Nominatim ／ ルート検索 OSRM
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
