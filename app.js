@@ -283,6 +283,7 @@ function renderCandidateGroup(containerId, label, list, key) {
 
 // ルートを取得してガソリン代を計算し、地図とカードに表示する
 async function calculate() {
+  hideCandidates();
   showLoading("ルートを検索しています…");
   const { originPlace: o, destinationPlace: d, efficiency, price } = current;
   const coords = `${o.lon},${o.lat};${d.lon},${d.lat}`;
