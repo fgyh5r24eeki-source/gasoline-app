@@ -12,27 +12,35 @@
     <h1>ガソリン代ルート比較</h1>
   </header>
 
+  <p id="banner" class="banner" hidden role="alert"></p>
+
   <main>
     <!-- 1. 入力欄 -->
     <section class="card">
       <form id="input-form" novalidate>
         <label>出発地
-          <input type="text" id="origin" placeholder="例：東京駅">
+          <input type="text" id="origin" placeholder="例：東京駅" autocomplete="off">
+          <div id="origin-suggestions" class="suggestions" hidden></div>
+          <span id="origin-error" class="field-error" hidden></span>
         </label>
         <label>目的地
-          <input type="text" id="destination" placeholder="例：横浜駅">
+          <input type="text" id="destination" placeholder="例：横浜駅" autocomplete="off">
+          <div id="destination-suggestions" class="suggestions" hidden></div>
+          <span id="destination-error" class="field-error" hidden></span>
         </label>
         <div class="row">
           <label>燃費（km/L）
             <input type="number" id="efficiency" step="0.1" min="0" inputmode="decimal" placeholder="例：15">
+            <span id="efficiency-error" class="field-error" hidden></span>
           </label>
           <label>単価（円/L）
             <input type="number" id="price" step="1" min="0" inputmode="decimal" placeholder="例：170">
+            <span id="price-error" class="field-error" hidden></span>
           </label>
         </div>
         <button type="submit" id="calc-button">計算</button>
       </form>
-      <p id="message" class="message" hidden></p>
+      <p id="hint" class="hint" hidden></p>
     </section>
 
     <!-- 2. 地名候補の一覧 -->
@@ -44,19 +52,20 @@
 
     <!-- 3. 地図 -->
     <section class="card">
-      <div id="map"></div>
+      <div id="map-wrap">
+        <div id="map"></div>
+        <div id="map-overlay" class="map-overlay" hidden>
+          <div class="spinner" aria-hidden="true"></div>
+          <p id="map-overlay-text"></p>
+        </div>
+      </div>
     </section>
 
-    <!-- 4. 比較表 -->
+    <!-- 4. 比較（カード表示） -->
     <section id="result" class="card" hidden>
       <h2>ルート比較</h2>
       <p id="suggestion" class="suggestion"></p>
-      <table>
-        <thead>
-          <tr><th>ルート</th><th>距離</th><th>所要時間</th><th>ガソリン代</th></tr>
-        </thead>
-        <tbody id="result-body"></tbody>
-      </table>
+      <div id="route-cards" class="route-cards"></div>
     </section>
   </main>
 

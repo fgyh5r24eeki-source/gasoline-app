@@ -7,48 +7,109 @@ body {
   color: #222;
 }
 
-header { background: #1f6feb; color: #fff; padding: 12px 16px; }
+header {
+  background: linear-gradient(135deg, #1f6feb, #6a3df0);
+  color: #fff;
+  padding: 16px;
+}
 header h1 { margin: 0; font-size: 1.2rem; }
+
+.banner {
+  margin: 0;
+  padding: 10px 16px;
+  background: #b00020;
+  color: #fff;
+  font-size: .9rem;
+  text-align: center;
+}
 
 main {
   max-width: 900px;
   margin: 0 auto;
-  padding: 12px 16px;
+  padding: 16px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 14px;
 }
 
-.card { background: #fff; border-radius: 8px; padding: 12px; box-shadow: 0 1px 3px rgba(0,0,0,.1); }
+.card { background: #fff; border-radius: 12px; padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,.08); }
 .card h2 { margin: 0 0 8px; font-size: 1rem; }
 
-label { display: block; margin-bottom: 10px; font-size: .9rem; }
+label { display: block; margin-bottom: 12px; font-size: .9rem; position: relative; }
 input {
   display: block;
   width: 100%;
   margin-top: 4px;
-  padding: 8px;
+  padding: 10px;
   font-size: 1rem;
   border: 1px solid #ccc;
-  border-radius: 6px;
+  border-radius: 8px;
+  transition: border-color .15s ease, box-shadow .15s ease;
+}
+input:focus {
+  outline: none;
+  border-color: #1f6feb;
+  box-shadow: 0 0 0 3px rgba(31,111,235,.15);
+}
+input.invalid {
+  border-color: #b00020;
+  box-shadow: 0 0 0 3px rgba(176,0,32,.12);
 }
 .row { display: flex; gap: 12px; }
 .row label { flex: 1; }
 
+.field-error {
+  display: block;
+  margin-top: 4px;
+  font-size: .8rem;
+  color: #b00020;
+}
+
 button {
   width: 100%;
-  padding: 10px;
+  padding: 12px;
   font-size: 1rem;
+  font-weight: 600;
   border: none;
-  border-radius: 6px;
+  border-radius: 8px;
   background: #1f6feb;
   color: #fff;
   cursor: pointer;
+  transition: transform .1s ease, background .15s ease;
 }
+button:hover:not(:disabled) { background: #1a5fd0; }
+button:active:not(:disabled) { transform: scale(.97); }
 button:disabled { background: #9bb8ee; cursor: wait; }
 
-.message { margin: 10px 0 0; padding: 8px; border-radius: 6px; background: #eef4ff; }
-.message.error { background: #ffecec; color: #b00020; }
+.hint { margin: 10px 0 0; padding: 8px 10px; border-radius: 8px; background: #eef4ff; font-size: .9rem; }
+
+/* 地名の自動補完 */
+.suggestions {
+  position: absolute;
+  z-index: 20;
+  left: 0; right: 0;
+  top: 100%;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,.12);
+  margin-top: 2px;
+  max-height: 220px;
+  overflow-y: auto;
+}
+.suggestions button {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: #fff;
+  color: #222;
+  font-size: .85rem;
+  font-weight: normal;
+  padding: 8px 10px;
+  border-radius: 0;
+}
+.suggestions button:hover,
+.suggestions button:active { background: #f0f3f8; transform: none; }
 
 .candidate-group { margin-bottom: 12px; }
 .candidate-group h3 { margin: 0 0 6px; font-size: .9rem; }
@@ -62,18 +123,70 @@ button:disabled { background: #9bb8ee; cursor: wait; }
 }
 .candidate-group li button.selected { background: #1f6feb; color: #fff; }
 
-#map { height: 360px; border-radius: 6px; }
+#map-wrap { position: relative; }
+#map { height: 360px; border-radius: 8px; }
 
-table { width: 100%; border-collapse: collapse; font-size: .9rem; }
-th, td { padding: 6px; border-bottom: 1px solid #eee; text-align: right; }
-th:first-child, td:first-child { text-align: left; }
-tr.cheapest { background: #fff6d6; font-weight: bold; }
-.swatch { display: inline-block; width: 12px; height: 12px; border-radius: 2px; margin-right: 6px; vertical-align: middle; }
-.suggestion { margin: 0 0 8px; font-weight: bold; }
+.map-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(255,255,255,.75);
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  z-index: 400; /* Leafletのタイルより手前に表示する */
+}
+.spinner {
+  width: 34px;
+  height: 34px;
+  border: 4px solid #cddcfb;
+  border-top-color: #1f6feb;
+  border-radius: 50%;
+  animation: spin .8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+#map-overlay-text { margin: 0; font-size: .9rem; color: #333; }
+
+.suggestion { margin: 0 0 12px; font-weight: bold; }
+
+/* ルート比較カード */
+.route-cards { display: flex; flex-direction: column; gap: 10px; }
+.route-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  text-align: left;
+  background: #f7f8fa;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 12px;
+  cursor: pointer;
+  transition: transform .1s ease, box-shadow .15s ease;
+  font: inherit;
+  color: inherit;
+}
+.route-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,.08); }
+.route-card:active { transform: scale(.99); }
+.route-card.cheapest { background: #fff6d6; border-color: #f0d878; }
+.route-card .swatch { flex: 0 0 auto; width: 14px; height: 14px; border-radius: 3px; }
+.route-card .route-main { flex: 1; }
+.route-card .route-name { font-weight: 600; font-size: .95rem; }
+.route-card .route-detail { font-size: .8rem; color: #555; margin-top: 2px; }
+.route-card .route-cost { text-align: right; }
+.route-card .route-cost .yen { font-size: 1.1rem; font-weight: 700; }
+.route-card .route-diff { font-size: .78rem; margin-top: 2px; }
+.route-card .route-diff.positive { color: #2da44e; }
+.route-card .route-diff.negative { color: #888; }
 
 footer { text-align: center; font-size: .75rem; color: #666; padding: 12px; }
 
 @media (max-width: 480px) {
+  main { padding: 10px; gap: 10px; }
+  .card { padding: 12px; }
   .row { flex-direction: column; gap: 0; }
-  #map { height: 300px; }
+  #map { height: 280px; }
+  .route-card { padding: 10px; }
 }
